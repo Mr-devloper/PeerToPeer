@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PulseShare | Secure P2P File Transfer</title>
+    <title>DirectShare | Secure P2P File Transfer</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -44,6 +44,12 @@
             text-align: center;
             padding: 40px 20px;
             margin-bottom: 30px;
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .logo {
@@ -57,6 +63,13 @@
         .logo-icon {
             font-size: 2.5rem;
             color: var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         h1 {
@@ -91,6 +104,12 @@
             padding: 30px;
             transition: var(--transition);
             overflow: hidden;
+            animation: slideUp 0.8s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .card-header {
@@ -140,6 +159,7 @@
             transition: var(--transition);
             cursor: pointer;
             border: 2px solid transparent;
+            animation: fadeIn 0.8s ease;
         }
 
         .action-card:hover {
@@ -173,6 +193,7 @@
         .connection-section {
             display: none;
             margin-top: 30px;
+            animation: fadeIn 0.5s ease;
         }
 
         .connection-section.active {
@@ -220,6 +241,8 @@
             cursor: pointer;
             transition: var(--transition);
             margin-top: 20px;
+            position: relative;
+            overflow: hidden;
         }
 
         .action-btn:hover {
@@ -234,6 +257,22 @@
             box-shadow: none;
         }
 
+        .action-btn:after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 20%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(25deg);
+            transition: all 0.8s;
+        }
+
+        .action-btn:hover:after {
+            left: 140%;
+        }
+
         .code-display {
             background: rgba(0, 0, 0, 0.3);
             border-radius: var(--border-radius);
@@ -245,6 +284,7 @@
             letter-spacing: 3px;
             color: var(--accent);
             border: 2px dashed rgba(0, 210, 255, 0.3);
+            animation: pulse 2s infinite;
         }
 
         .status-section {
@@ -376,6 +416,13 @@
             justify-content: center;
             font-size: 1.8rem;
             margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
         }
 
         .user-name {
@@ -403,6 +450,13 @@
             font-size: 3rem;
             color: var(--accent);
             margin-bottom: 15px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-20px);}
+            60% {transform: translateY(-10px);}
         }
 
         .file-drop-text {
@@ -451,6 +505,35 @@
             color: var(--accent);
             font-weight: 700;
         }
+
+        .connection-animation {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .connection-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: bounce 1.5s infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
     </style>
 </head>
 <body>
@@ -458,7 +541,7 @@
         <header>
             <div class="logo">
                 <i class="fas fa-share-alt logo-icon"></i>
-                <h1>PulseShare</h1>
+                <h1>DirectShare</h1>
             </div>
             <p class="subtitle">Secure peer-to-peer file transfer using unique connection codes. Transfer files directly without servers.</p>
         </header>
@@ -493,7 +576,7 @@
                 <div class="connection-section" id="hostSection">
                     <div class="input-group">
                         <label class="input-label">Your Name</label>
-                        <input type="text" id="hostName" class="input-field" placeholder="Enter your name">
+                        <input type="text" id="hostName" class="input-field" placeholder="Enter your name" value="Alex">
                     </div>
                     
                     <button id="createSessionBtn" class="action-btn">
@@ -503,24 +586,40 @@
                     <div id="sessionCodeContainer" style="display: none;">
                         <p class="input-label">Share this code with the recipient:</p>
                         <div class="code-display" id="sessionCode">X7B9K2</div>
-                        <p class="input-label">Waiting for recipient to join...</p>
+                        <div class="connection-animation" id="hostConnectionAnimation">
+                            <p>Waiting for recipient to join...</p>
+                            <div class="connection-dots">
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="connection-section" id="joinSection">
                     <div class="input-group">
                         <label class="input-label">Your Name</label>
-                        <input type="text" id="joinName" class="input-field" placeholder="Enter your name">
+                        <input type="text" id="joinName" class="input-field" placeholder="Enter your name" value="Sam">
                     </div>
                     
                     <div class="input-group">
                         <label class="input-label">Connection Code</label>
-                        <input type="text" id="joinCode" class="input-field" placeholder="Enter the 6-digit code">
+                        <input type="text" id="joinCode" class="input-field" placeholder="Enter the 6-digit code" value="X7B9K2">
                     </div>
                     
                     <button id="joinSessionBtn" class="action-btn">
                         <i class="fas fa-sign-in-alt"></i> Join Transfer Session
                     </button>
+                    
+                    <div class="connection-animation" id="joinConnectionAnimation" style="display: none;">
+                        <p>Connecting to peer...</p>
+                        <div class="connection-dots">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -613,6 +712,8 @@
             const joinSessionBtn = document.getElementById('joinSessionBtn');
             const sessionCodeContainer = document.getElementById('sessionCodeContainer');
             const sessionCode = document.getElementById('sessionCode');
+            const hostConnectionAnimation = document.getElementById('hostConnectionAnimation');
+            const joinConnectionAnimation = document.getElementById('joinConnectionAnimation');
             const senderName = document.getElementById('senderName');
             const receiverName = document.getElementById('receiverName');
             const fileDropArea = document.getElementById('fileDropArea');
@@ -627,7 +728,6 @@
             // State variables
             let selectedFile = null;
             let isHost = false;
-            let connectionCode = '';
             let transferInProgress = false;
             
             // Setup UI interactions
@@ -645,6 +745,10 @@
                 hostSection.classList.remove('active');
             });
             
+            // Auto-select host card on page load
+            hostCard.classList.add('active');
+            hostSection.classList.add('active');
+            
             // Create session
             createSessionBtn.addEventListener('click', () => {
                 const name = document.getElementById('hostName').value.trim();
@@ -660,18 +764,16 @@
                 connectionCode = Math.random().toString(36).substring(2, 8).toUpperCase();
                 sessionCode.textContent = connectionCode;
                 sessionCodeContainer.style.display = 'block';
+                hostConnectionAnimation.style.display = 'block';
+                
+                createSessionBtn.innerHTML = '<i class="fas fa-check"></i> Session Created!';
+                createSessionBtn.disabled = true;
                 
                 // Simulate connection process
                 setTimeout(() => {
-                    createSessionBtn.textContent = 'Session Created!';
-                    createSessionBtn.disabled = true;
-                    
-                    // Show transfer UI after 2 seconds
-                    setTimeout(() => {
-                        transferSection.style.display = 'block';
-                        document.getElementById('hostSection').scrollIntoView({ behavior: 'smooth' });
-                    }, 2000);
-                }, 1000);
+                    transferSection.style.display = 'block';
+                    document.getElementById('transferSection').scrollIntoView({ behavior: 'smooth' });
+                }, 2500);
             });
             
             // Join session
@@ -695,16 +797,17 @@
                 // Simulate connection process
                 joinSessionBtn.textContent = 'Connecting...';
                 joinSessionBtn.disabled = true;
+                joinConnectionAnimation.style.display = 'block';
                 
                 setTimeout(() => {
-                    joinSessionBtn.textContent = 'Connected!';
+                    joinSessionBtn.innerHTML = '<i class="fas fa-check"></i> Connected!';
                     
                     // Show transfer UI after 1 second
                     setTimeout(() => {
                         transferSection.style.display = 'block';
                         document.getElementById('transferSection').scrollIntoView({ behavior: 'smooth' });
                     }, 1000);
-                }, 1500);
+                }, 2000);
             });
             
             // File selection
@@ -739,6 +842,23 @@
                 selectedFile = file;
                 fileName.value = file.name;
                 sendFileBtn.disabled = false;
+                
+                // Add file preview
+                statusContainer.innerHTML = `
+                    <div class="status-item">
+                        <i class="fas fa-file status-icon"></i>
+                        <div class="file-info">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${formatFileSize(file.size)}</div>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <i class="fas fa-check-circle status-icon"></i>
+                        <div class="file-info">
+                            <span>File selected and ready to send</span>
+                        </div>
+                    </div>
+                `;
             }
             
             // Send file
@@ -838,7 +958,7 @@
                 const k = 1024;
                 const sizes = ['Bytes', 'KB', 'MB', 'GB'];
                 const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return parseFloat((bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
             }
         });
     </script>
