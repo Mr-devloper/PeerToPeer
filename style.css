@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseShare | Secure P2P File Transfer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --accent: #00d2ff;
+            --light: #f8f9fa;
+            --dark: #1a1a2e;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 16px;
+            --box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            --transition: all 0.3s ease;
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--accent);
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--accent), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--light-gray);
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--light);
+        }
+
+        .action-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .action-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .action-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent);
+        }
+
+        .action-card.active {
+            background: rgba(0, 210, 255, 0.1);
+            border-color: var(--accent);
+        }
+
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+
+        .action-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .action-description {
+            color: var(--light-gray);
+            font-size: 0.95rem;
+        }
+
+        .connection-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .connection-section.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            color: var(--light);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.2);
+        }
+
+        .action-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 20px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(37, 117, 252, 0.4);
+        }
+
+        .action-btn:disabled {
+            background: var(--light-gray);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .code-display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: var(--accent);
+            border: 2px dashed rgba(0, 210, 255, 0.3);
+        }
+
+        .status-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .status-section.active {
+            display: block;
+        }
+
+        .status-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+
+        .status-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            padding: 20px;
+        }
+
+        .status-item {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-icon {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .file-info {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .file-size {
+            color: var(--light-gray);
+            font-size: 0.9rem;
+        }
+
+        .progress-container {
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .transfer-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            flex: 1;
+            text-align: center;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .connected-users {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .user-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .file-drop-area {
+            border: 2px dashed rgba(0, 210, 255, 0.3);
+            border-radius: var(--border-radius);
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .file-drop-area:hover {
+            border-color: var(--accent);
+            background-color: rgba(0, 210, 255, 0.05);
+        }
+
+        .file-drop-icon {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .file-drop-text {
+            font-size: 1.1rem;
+            color: var(--light-gray);
+            margin-bottom: 15px;
+        }
+
+        .browse-btn {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 1rem;
+        }
+
+        .browse-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #fileInput {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--light-gray);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
+        }
+
+        .highlight {
+            color: var(--accent);
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-share-alt logo-icon"></i>
+                <h1>PulseShare</h1>
+            </div>
+            <p class="subtitle">Secure peer-to-peer file transfer using unique connection codes. Transfer files directly without servers.</p>
+        </header>
+
+        <div class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <h2 class="card-title">Connect to Peer</h2>
+                </div>
+                
+                <div class="action-container">
+                    <div class="action-card" id="hostCard">
+                        <div class="action-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <h3 class="action-title">Create Session</h3>
+                        <p class="action-description">Host a new transfer session and share your unique code</p>
+                    </div>
+                    
+                    <div class="action-card" id="joinCard">
+                        <div class="action-icon">
+                            <i class="fas fa-user-friends"></i>
+                        </div>
+                        <h3 class="action-title">Join Session</h3>
+                        <p class="action-description">Enter a code to join an existing transfer session</p>
+                    </div>
+                </div>
+                
+                <div class="connection-section" id="hostSection">
+                    <div class="input-group">
+                        <label class="input-label">Your Name</label>
+                        <input type="text" id="hostName" class="input-field" placeholder="Enter your name">
+                    </div>
+                    
+                    <button id="createSessionBtn" class="action-btn">
+                        <i class="fas fa-plus-circle"></i> Create Transfer Session
+                    </button>
+                    
+                    <div id="sessionCodeContainer" style="display: none;">
+                        <p class="input-label">Share this code with the recipient:</p>
+                        <div class="code-display" id="sessionCode">X7B9K2</div>
+                        <p class="input-label">Waiting for recipient to join...</p>
+                    </div>
+                </div>
+                
+                <div class="connection-section" id="joinSection">
+                    <div class="input-group">
+                        <label class="input-label">Your Name</label>
+                        <input type="text" id="joinName" class="input-field" placeholder="Enter your name">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Connection Code</label>
+                        <input type="text" id="joinCode" class="input-field" placeholder="Enter the 6-digit code">
+                    </div>
+                    
+                    <button id="joinSessionBtn" class="action-btn">
+                        <i class="fas fa-sign-in-alt"></i> Join Transfer Session
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card" id="transferSection" style="display: none;">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <h2 class="card-title">File Transfer</h2>
+                </div>
+                
+                <div class="connected-users">
+                    <div class="user-badge">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-name" id="senderName">Alex</div>
+                    </div>
+                    
+                    <div class="user-badge">
+                        <i class="fas fa-arrow-right" style="font-size: 2rem; margin-top: 25px; color: var(--accent);"></i>
+                    </div>
+                    
+                    <div class="user-badge">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-name" id="receiverName">Sam</div>
+                    </div>
+                </div>
+                
+                <div id="senderSection">
+                    <div class="file-drop-area" id="fileDropArea">
+                        <div class="file-drop-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <p class="file-drop-text">Drag & drop your file here or click to browse</p>
+                        <button class="browse-btn">Select File</button>
+                        <input type="file" id="fileInput">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Selected File</label>
+                        <input type="text" id="fileName" class="input-field" placeholder="No file selected" disabled>
+                    </div>
+                    
+                    <button id="sendFileBtn" class="action-btn" disabled>
+                        <i class="fas fa-paper-plane"></i> Send File
+                    </button>
+                </div>
+                
+                <div class="status-section" id="transferStatusSection">
+                    <h3 class="status-title">Transfer Status</h3>
+                    <div class="status-container" id="statusContainer">
+                        <div class="status-item">
+                            <i class="fas fa-info-circle status-icon"></i>
+                            <div class="file-info">
+                                <span>Ready to transfer files</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="transfer-controls">
+                        <button class="btn btn-secondary" id="cancelBtn">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button class="btn btn-primary" id="newTransferBtn">
+                            <i class="fas fa-redo"></i> New Transfer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Made with ❤️ using WebRTC | Secure P2P File Transfer | No Servers Involved</p>
+            <p>All transfers are encrypted and direct between peers. Your files never touch our servers.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const hostCard = document.getElementById('hostCard');
+            const joinCard = document.getElementById('joinCard');
+            const hostSection = document.getElementById('hostSection');
+            const joinSection = document.getElementById('joinSection');
+            const transferSection = document.getElementById('transferSection');
+            const createSessionBtn = document.getElementById('createSessionBtn');
+            const joinSessionBtn = document.getElementById('joinSessionBtn');
+            const sessionCodeContainer = document.getElementById('sessionCodeContainer');
+            const sessionCode = document.getElementById('sessionCode');
+            const senderName = document.getElementById('senderName');
+            const receiverName = document.getElementById('receiverName');
+            const fileDropArea = document.getElementById('fileDropArea');
+            const fileInput = document.getElementById('fileInput');
+            const fileName = document.getElementById('fileName');
+            const sendFileBtn = document.getElementById('sendFileBtn');
+            const statusContainer = document.getElementById('statusContainer');
+            const transferStatusSection = document.getElementById('transferStatusSection');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const newTransferBtn = document.getElementById('newTransferBtn');
+            
+            // State variables
+            let selectedFile = null;
+            let isHost = false;
+            let connectionCode = '';
+            let transferInProgress = false;
+            
+            // Setup UI interactions
+            hostCard.addEventListener('click', () => {
+                hostCard.classList.add('active');
+                joinCard.classList.remove('active');
+                hostSection.classList.add('active');
+                joinSection.classList.remove('active');
+            });
+            
+            joinCard.addEventListener('click', () => {
+                joinCard.classList.add('active');
+                hostCard.classList.remove('active');
+                joinSection.classList.add('active');
+                hostSection.classList.remove('active');
+            });
+            
+            // Create session
+            createSessionBtn.addEventListener('click', () => {
+                const name = document.getElementById('hostName').value.trim();
+                if (!name) {
+                    alert('Please enter your name');
+                    return;
+                }
+                
+                senderName.textContent = name;
+                isHost = true;
+                
+                // Generate a random 6-digit code
+                connectionCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                sessionCode.textContent = connectionCode;
+                sessionCodeContainer.style.display = 'block';
+                
+                // Simulate connection process
+                setTimeout(() => {
+                    createSessionBtn.textContent = 'Session Created!';
+                    createSessionBtn.disabled = true;
+                    
+                    // Show transfer UI after 2 seconds
+                    setTimeout(() => {
+                        transferSection.style.display = 'block';
+                        document.getElementById('hostSection').scrollIntoView({ behavior: 'smooth' });
+                    }, 2000);
+                }, 1000);
+            });
+            
+            // Join session
+            joinSessionBtn.addEventListener('click', () => {
+                const name = document.getElementById('joinName').value.trim();
+                const code = document.getElementById('joinCode').value.trim().toUpperCase();
+                
+                if (!name) {
+                    alert('Please enter your name');
+                    return;
+                }
+                
+                if (!code || code.length !== 6) {
+                    alert('Please enter a valid 6-digit code');
+                    return;
+                }
+                
+                receiverName.textContent = name;
+                isHost = false;
+                
+                // Simulate connection process
+                joinSessionBtn.textContent = 'Connecting...';
+                joinSessionBtn.disabled = true;
+                
+                setTimeout(() => {
+                    joinSessionBtn.textContent = 'Connected!';
+                    
+                    // Show transfer UI after 1 second
+                    setTimeout(() => {
+                        transferSection.style.display = 'block';
+                        document.getElementById('transferSection').scrollIntoView({ behavior: 'smooth' });
+                    }, 1000);
+                }, 1500);
+            });
+            
+            // File selection
+            fileDropArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileDropArea.style.borderColor = 'var(--accent)';
+                fileDropArea.style.backgroundColor = 'rgba(0, 210, 255, 0.1)';
+            });
+            
+            fileDropArea.addEventListener('dragleave', () => {
+                fileDropArea.style.borderColor = 'rgba(0, 210, 255, 0.3)';
+                fileDropArea.style.backgroundColor = '';
+            });
+            
+            fileDropArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileDropArea.style.borderColor = 'rgba(0, 210, 255, 0.3)';
+                fileDropArea.style.backgroundColor = '';
+                
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    handleFileSelection(e.dataTransfer.files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    handleFileSelection(e.target.files[0]);
+                }
+            });
+            
+            function handleFileSelection(file) {
+                selectedFile = file;
+                fileName.value = file.name;
+                sendFileBtn.disabled = false;
+            }
+            
+            // Send file
+            sendFileBtn.addEventListener('click', () => {
+                if (!selectedFile) return;
+                
+                transferInProgress = true;
+                sendFileBtn.disabled = true;
+                
+                // Show transfer status
+                transferStatusSection.classList.add('active');
+                statusContainer.innerHTML = `
+                    <div class="status-item">
+                        <i class="fas fa-file status-icon"></i>
+                        <div class="file-info">
+                            <div class="file-name">${selectedFile.name}</div>
+                            <div class="file-size">${formatFileSize(selectedFile.size)}</div>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <i class="fas fa-sync-alt fa-spin status-icon"></i>
+                        <div class="file-info">
+                            <div>Transferring file...</div>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Simulate file transfer progress
+                const progressFill = document.getElementById('progressFill');
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 5;
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(interval);
+                        
+                        // Transfer complete
+                        setTimeout(() => {
+                            statusContainer.innerHTML += `
+                                <div class="status-item">
+                                    <i class="fas fa-check-circle status-icon"></i>
+                                    <div class="file-info">
+                                        <div>Transfer completed successfully!</div>
+                                        <div>File received by ${isHost ? receiverName.textContent : senderName.textContent}</div>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            // Show download button for receiver
+                            if (!isHost) {
+                                statusContainer.innerHTML += `
+                                    <div class="status-item">
+                                        <i class="fas fa-download status-icon"></i>
+                                        <div class="file-info">
+                                            <div>Ready to download</div>
+                                            <button class="btn btn-primary" id="downloadBtn" style="margin-top: 10px;">
+                                                <i class="fas fa-download"></i> Download File
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                                
+                                document.getElementById('downloadBtn').addEventListener('click', () => {
+                                    alert('File download started! In a real app, this would save the file.');
+                                });
+                            }
+                        }, 300);
+                    }
+                    progressFill.style.width = `${progress}%`;
+                }, 100);
+            });
+            
+            // New transfer button
+            newTransferBtn.addEventListener('click', () => {
+                selectedFile = null;
+                fileName.value = '';
+                sendFileBtn.disabled = true;
+                transferStatusSection.classList.remove('active');
+                statusContainer.innerHTML = `
+                    <div class="status-item">
+                        <i class="fas fa-info-circle status-icon"></i>
+                        <div class="file-info">
+                            <span>Ready to transfer files</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Helper function to format file size
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+            }
+        });
+    </script>
+</body>
+</html>
