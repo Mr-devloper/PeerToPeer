@@ -1,30 +1,698 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MizanShare Easy P2P</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TorrentShare | Modern P2P File Transfer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/webtorrent@latest/webtorrent.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--light-gray);
+            border-radius: var(--border-radius);
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.03);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: var(--gray);
+            margin-bottom: 15px;
+        }
+
+        .browse-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 1rem;
+        }
+
+        .browse-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+        }
+
+        #fileInput {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 20px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .action-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 20px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(67, 97, 238, 0.4);
+        }
+
+        .action-btn:disabled {
+            background: var(--light-gray);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status-section {
+            margin-top: 30px;
+        }
+
+        .status-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .status-container {
+            background-color: var(--light);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .status-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-icon {
+            font-size: 1.2rem;
+        }
+
+        .status-icon.upload {
+            color: var(--primary);
+        }
+
+        .status-icon.download {
+            color: var(--success);
+        }
+
+        .progress-container {
+            flex-grow: 1;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: var(--light-gray);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .file-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .how-it-works {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 40px;
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 40px;
+            color: var(--dark);
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .step {
+            text-align: center;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .step:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 auto 20px;
+        }
+
+        .step-title {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .step-description {
+            color: var(--gray);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .magnet-link {
+            word-break: break-all;
+            padding: 10px;
+            background-color: var(--light);
+            border-radius: var(--border-radius);
+            margin-top: 15px;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        .torrent-id {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>MizanShare Easy P2P</h1>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-share-alt logo-icon"></i>
+                <h1>TorrentShare</h1>
+            </div>
+            <p class="subtitle">A modern, beautiful, and secure peer-to-peer file sharing platform. Share files directly between devices without any servers in between.</p>
+        </header>
 
-    <div class="session-control">
-      <button id="createSession">Create Simple Code</button>
-      <input type="text" id="simpleCodeInput" placeholder="Enter Simple Code to Join" maxlength="8" />
-      <button id="joinSession">Join by Code</button>
+        <div class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h2 class="card-title">Share a File</h2>
+                </div>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <p class="upload-text">Drag & drop your file here or click to browse</p>
+                    <button class="browse-btn">Browse Files</button>
+                    <input type="file" id="fileInput">
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">File Name</label>
+                    <input type="text" id="fileName" class="input-field" placeholder="Enter a name for your file" disabled>
+                </div>
+                
+                <button id="shareBtn" class="action-btn" disabled>
+                    <i class="fas fa-magnet"></i> Generate Share Link
+                </button>
+                
+                <div id="magnetContainer">
+                    <p class="input-label">Share this link with others:</p>
+                    <div id="magnetLink" class="magnet-link"></div>
+                </div>
+                
+                <div class="status-section">
+                    <h3 class="status-title">Upload Status</h3>
+                    <div class="status-container" id="uploadStatus">
+                        <div class="status-item">
+                            <i class="fas fa-info-circle status-icon"></i>
+                            <span>No active uploads. Select a file to share.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-cloud-download-alt"></i>
+                    </div>
+                    <h2 class="card-title">Download a File</h2>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Magnet Link or Torrent ID</label>
+                    <input type="text" id="torrentId" class="input-field" placeholder="Enter magnet link or torrent ID">
+                </div>
+                
+                <button id="downloadBtn" class="action-btn">
+                    <i class="fas fa-download"></i> Start Download
+                </button>
+                
+                <div class="status-section">
+                    <h3 class="status-title">Download Status</h3>
+                    <div class="status-container" id="downloadStatus">
+                        <div class="status-item">
+                            <i class="fas fa-info-circle status-icon"></i>
+                            <span>No active downloads. Enter a magnet link to start.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="how-it-works">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3 class="step-title">Upload or Select</h3>
+                    <p class="step-description">Choose a file from your device or drag and drop it into the upload area.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3 class="step-title">Generate Link</h3>
+                    <p class="step-description">Our system creates a secure magnet link for your file.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3 class="step-title">Share Securely</h3>
+                    <p class="step-description">Share the magnet link with anyone you want to send the file to.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3 class="step-title">Direct Transfer</h3>
+                    <p class="step-description">Files transfer directly between devices using WebRTC technology.</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Made with ❤️ using WebTorrent | Secure P2P File Sharing | No Servers Involved</p>
+            <p>All transfers are encrypted and direct between peers. Your files never touch our servers.</p>
+        </footer>
     </div>
 
-    <div class="file-transfer">
-      <input type="file" id="fileInput" disabled />
-      <div id="fileInfo"></div>
-      <progress id="progressBar" value="0" max="100"></progress>
-    </div>
-
-    <div id="notifications"></div>
-  </div>
-  <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const client = new WebTorrent();
+            let fileToShare = null;
+            
+            // DOM Elements
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const fileNameInput = document.getElementById('fileName');
+            const shareBtn = document.getElementById('shareBtn');
+            const magnetLink = document.getElementById('magnetLink');
+            const magnetContainer = document.getElementById('magnetContainer');
+            const uploadStatus = document.getElementById('uploadStatus');
+            const torrentIdInput = document.getElementById('torrentId');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const downloadStatus = document.getElementById('downloadStatus');
+            
+            // Upload area interactions
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--primary)';
+                uploadArea.style.backgroundColor = 'rgba(67, 97, 238, 0.05)';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = 'var(--light-gray)';
+                uploadArea.style.backgroundColor = '';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--light-gray)';
+                uploadArea.style.backgroundColor = '';
+                
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    handleFileSelection(e.dataTransfer.files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    handleFileSelection(e.target.files[0]);
+                }
+            });
+            
+            // Handle file selection
+            function handleFileSelection(file) {
+                fileToShare = file;
+                fileNameInput.value = file.name;
+                shareBtn.disabled = false;
+                
+                // Update upload status
+                uploadStatus.innerHTML = `
+                    <div class="status-item">
+                        <i class="fas fa-file status-icon upload"></i>
+                        <div>
+                            <div>${file.name}</div>
+                            <div class="file-info">
+                                <span>${formatFileSize(file.size)}</span>
+                                <span>Ready to share</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Share button handler
+            shareBtn.addEventListener('click', () => {
+                if (!fileToShare) return;
+                
+                shareBtn.disabled = true;
+                shareBtn.textContent = 'Creating Torrent...';
+                
+                client.seed(fileToShare, (torrent) => {
+                    // Update UI
+                    shareBtn.textContent = 'Share Link Generated!';
+                    magnetLink.textContent = torrent.magnetURI;
+                    magnetLink.style.display = 'block';
+                    
+                    // Update status
+                    uploadStatus.innerHTML = `
+                        <div class="status-item">
+                            <i class="fas fa-file status-icon upload"></i>
+                            <div style="flex-grow: 1;">
+                                <div>${fileToShare.name}</div>
+                                <div class="file-info">
+                                    <span>${formatFileSize(fileToShare.size)}</span>
+                                    <span>Seeding: 0 peers</span>
+                                </div>
+                                <div class="progress-container">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Update peer count
+                    torrent.on('wire', (wire) => {
+                        const peersElement = uploadStatus.querySelector('.file-info span:last-child');
+                        if (peersElement) {
+                            peersElement.textContent = `Seeding: ${torrent.wires.length} peer${torrent.wires.length !== 1 ? 's' : ''}`;
+                        }
+                    });
+                });
+            });
+            
+            // Download button handler
+            downloadBtn.addEventListener('click', () => {
+                const torrentId = torrentIdInput.value.trim();
+                if (!torrentId) return;
+                
+                downloadBtn.disabled = true;
+                downloadBtn.textContent = 'Downloading...';
+                
+                // Add to download status
+                downloadStatus.innerHTML = `
+                    <div class="status-item">
+                        <i class="fas fa-sync-alt fa-spin status-icon download"></i>
+                        <div style="flex-grow: 1;">
+                            <div>Connecting to peers...</div>
+                            <div class="file-info">
+                                <span>0%</span>
+                                <span>0 peers</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                const statusItem = downloadStatus.querySelector('.status-item');
+                
+                client.add(torrentId, (torrent) => {
+                    // Update status with filename
+                    const fileName = torrent.files[0].name;
+                    statusItem.querySelector('div > div:first-child').textContent = fileName;
+                    
+                    // Update download progress
+                    torrent.on('download', () => {
+                        const progress = Math.round(torrent.progress * 100);
+                        statusItem.querySelector('.progress-fill').style.width = `${progress}%`;
+                        statusItem.querySelector('.file-info span:first-child').textContent = `${progress}%`;
+                        statusItem.querySelector('.file-info span:last-child').textContent = 
+                            `${torrent.numPeers} peer${torrent.numPeers !== 1 ? 's' : ''}`;
+                    });
+                    
+                    // When download completes
+                    torrent.on('done', () => {
+                        downloadBtn.disabled = false;
+                        downloadBtn.innerHTML = '<i class="fas fa-download"></i> Start Download';
+                        statusItem.querySelector('i').className = 'fas fa-check-circle status-icon download';
+                        
+                        // Create download link
+                        const downloadLink = document.createElement('a');
+                        downloadLink.textContent = 'Download File';
+                        downloadLink.href = torrent.files[0].url;
+                        downloadLink.download = fileName;
+                        downloadLink.className = 'browse-btn';
+                        downloadLink.style.marginTop = '10px';
+                        downloadLink.style.display = 'inline-block';
+                        
+                        statusItem.querySelector('.progress-container').after(downloadLink);
+                    });
+                });
+            });
+            
+            // Helper function to format file size
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // Example magnet link for demo purposes
+            torrentIdInput.value = "magnet:?xt=urn:btih:08ada5a7a6183aae1e09d831df6748d566095a10&dn=Sintel&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fsintel.torrent";
+        });
+    </script>
 </body>
 </html>
