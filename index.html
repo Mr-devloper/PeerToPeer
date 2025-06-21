@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MizanShare‑P2P</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+</head>
+<body class="light">
+  <div class="container">
+    <h1>MizanShare‑P2P</h1>
+    <div class="row">
+      <button id="create">Session তৈরি</button>
+      <input id="peerId" placeholder="তোমার ID / অন্যের ID"/>
+      <button id="join">Join Session</button>
+    </div>
+    <div class="row">
+      <input type="file" id="fileInput" disabled />
+    </div>
+    <div id="status">Status: idle</div>
+    <div id="progress"><div id="bar"></div></div>
+    <button id="toggleTheme">Dark Mode</button>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
